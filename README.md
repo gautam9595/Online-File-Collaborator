@@ -26,7 +26,7 @@ After successful connection, a client can now access different functionalities b
        /invite <filename> <client_id> V
       ```
    * Editor (E): Read+write privilege, C2 can modify f
-     ```
+       ```
        /invite <filename> <client_id> E
        ```
 * ### Invites from other clients
@@ -35,15 +35,36 @@ After successful connection, a client can now access different functionalities b
    * Unsuccessful Invite: An invite can fail in many scenarios (ﬁle does not exist, C1 is not the owner, C2 declines the invite, etc.). The server sends appropriate failure messages to C1 (and depending on the situation, to C2 also).
 * ### Reading lines from a ﬁle 
   A client can request to read lines from a ﬁle by sending a query to the server. A client may be allowed to access the ﬁle (if it exists) only if it is the owner or a collaborator (either viewer or editor) of the requested ﬁle.
-        ```
-       /read <filename> <start_idx> <end_idx>
-        ```
-  Read from ﬁle ﬁlename starting from line index start_idx to end_idx . If only one index is speciﬁed, read that line. If none are speciﬁed, read the entire ﬁle.
+  ```
+  /read <filename> <start_idx> <end_idx>
+  ```
+  Read from ﬁle ﬁlename starting from line index start_idx to end_idx . If only one index is speciﬁed, read that line. If none are speciﬁed, read the entire ﬁle. These indices may be in the range \[-N, N) where N is the total no. of lines in the ﬁle
   * Successful Read: If the read is successful, the requested line(s) are returned to the client.
   * Unsuccessful Read: Appropriate error message is returned to client based on situation (ﬁle does not exist / client does not have access / invalid line numbers)
  * ### Inserting lines to a ﬁle
-   A client can request to insert line(s) into a ﬁle by sending a query to the server. A client may be allowed to modify the ﬁle (if it exists) only if it is the owner or a collaborator (editor only) of the requested ﬁle.
-   * Successful Delete: Return the entire contents of the modiﬁed ﬁle
-   * Unsuccessful Insert: Appropriate error message to be returned to client based on situation (ﬁle does not exist / client does not have access / invalid line number) 
+    A client can request to insert line(s) into a ﬁle by sending a query to the server. A client may be allowed to modify the ﬁle (if it exists) only if it is the owner or a collaborator (editor only) of the requested ﬁle. The client must indicate in its query the message (can contain newline characters) it wants to insert, and the line number it wishes to insert at, by specifying an index as above. If no index is speciﬁed, the contents of the message should be added at the end of the ﬁle.
+    ```
+    /insert <filename> <idx> “<message>”
+    ```
+   Quotes around the message to demarcate it from the other ﬁelds. The message starts should start " and ends with ". Within it, it can newline can be added by pressing enter key.<br />
+    * Successful Insert: Return the entire contents of the modiﬁed ﬁle
+    * Unsuccessful Insert: Unsuccessful Insert: Appropriate error message to be returned to client based on situation (ﬁle does not exist / client does not have access / invalid line number)
+* ### Deleting lines from a ﬁle
+  A client can request to delete line(s) into a ﬁle by sending a query to the server. A
+client may be allowed to modify the ﬁle (if it exists) only if it is the owner or a
+collaborator (editor only) of the requested ﬁle. The client must also indicate in its query the range of line numbers it wishes to
+delete, by specifying a starting and ending index. These indices may be in the range \[-N, N) where N is the total no. of lines in the ﬁle. If only a single index is speciﬁed, only that single line should be deleted. If no index is speciﬁed, the entire ﬁle contents (not the ﬁle itself) should be deleted (start=0, end=-1 or end=N-1).
+  ```
+  /delete <filename> <start_idx> <end_idx>
+  ```
+    * Successful Delete: Return the entire contents of the modiﬁed ﬁle
+    * Unsuccessful Insert: Appropriate error message to be returned to client based on situation (ﬁle does not exist / client does not have access /
+invalid line number) 
+* ### Exit
+    Disconnects from the server, and then all ﬁles which this client owned should be deleted at the server, and update the permission ﬁle.
+    ```
+    /exit
+    ```
 ## Client Functionalities
-Take command input from user, parse the command, validate it and send appropriate query message to the server
+Take command input from user, parse the command, validate it and send appropriate query message to the server. 
+
